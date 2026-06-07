@@ -7,7 +7,8 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-lock.url = "github:pr0d1r2/nixpkgs-lock";
+    nixpkgs.follows = "nixpkgs-lock/nixpkgs";
     model2vec-src = {
       url = "github:MinishLab/model2vec/v0.8.1";
       flake = false;
