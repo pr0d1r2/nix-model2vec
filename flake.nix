@@ -27,6 +27,7 @@
       self,
       nixpkgs,
       set-and-setting,
+      model2vec-src,
       ...
     }:
     let
@@ -50,6 +51,7 @@
     in
     {
       packages = forAllSystems (pkgs: {
+        default = import ./model2vec.nix { inherit pkgs; src = model2vec-src; };
         setting = (set-and-setting.lib.mkSetting { inherit pkgs; }).materialized;
       });
 
