@@ -34,8 +34,7 @@
       model2vec-src,
       ...
     }:
-    set-and-setting.lib.mkConsumerFlake {
-      inherit self nixpkgs set-and-setting;
+    let
       fragments = [
         "base"
         "nix"
@@ -44,12 +43,62 @@
         "markdown"
         "yaml"
       ];
-      src = ./.;
-      extraPackages = pkgs: {
-        default = import ./model2vec.nix {
-          inherit pkgs;
-          src = model2vec-src;
+      base = set-and-setting.lib.mkConsumerFlake {
+        inherit self nixpkgs set-and-setting;
+        inherit fragments;
+        src = ./.;
+        extraPackages = pkgs: {
+          default = import ./model2vec.nix {
+            inherit pkgs;
+            src = model2vec-src;
+          };
         };
       };
+      supportedSystems = [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+      forAllSystems =
+        f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
+    in
+    base
+    // {
+      apps = forAllSystems (
+        pkgs:
+        let
+          inherit (pkgs.stdenv.hostPlatform) system;
+          materialization = set-and-setting.lib.materializationFor {
+            inherit pkgs fragments;
+          };
+        in
+        base.apps.${system}
+        // {
+          confirm = {
+            type = "app";
+            program = "${
+              pkgs.writeShellApplication {
+                name = "confirm";
+                runtimeInputs = materialization.packages ++ [
+                  pkgs.diffutils
+                  pkgs.findutils
+                  pkgs.gawk
+                  pkgs.gnugrep
+                ];
+                text = ''
+                  export FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook"
+                  export ASSEMBLE_SCRIPT="${set-and-setting}/setting/lib/assemble-lefthook.sh"
+                  export DETECT_SCRIPT="${set-and-setting}/setting/lib/detect-fragments.sh"
+                  export SETTING_SRC="${self.packages.${system}.setting}"
+                  export CONFIRM_SCRIPT="${set-and-setting}/lib/confirm.sh"
+                  export CONFIRM_REV="${set-and-setting.rev or "unknown"}"
+                  bash "$CONFIRM_SCRIPT"
+                '';
+              }
+            }/bin/confirm";
+          };
+        }
+      );
     };
 }
