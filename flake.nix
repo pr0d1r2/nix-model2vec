@@ -10,14 +10,18 @@
     nixpkgs-lock.url = "github:pr0d1r2/nixpkgs-lock";
     nixpkgs.follows = "nixpkgs-lock/nixpkgs";
 
-    set-and-setting.url = "github:pr0d1r2/set-and-setting";
+    set-and-setting = {
+      url = "github:pr0d1r2/set-and-setting/d0196d19a0611cc959d967da4ec9f2bd72f14927";
+      inputs.nix-lefthook.follows = "nix-lefthook";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     model2vec-src = {
       url = "github:MinishLab/model2vec/v0.8.1";
       flake = false;
     };
     nix-lefthook = {
-      url = "github:pr0d1r2/nix-lefthook";
+      url = "github:pr0d1r2/nix-lefthook/694b2e9f2ef2b25d7a46a7ec5686ab18097cbf29";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -30,16 +34,8 @@
       model2vec-src,
       ...
     }:
-    let
-      supportedSystems = [
-        "aarch64-darwin"
-        "x86_64-darwin"
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
-      forAllSystems =
-        f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
-
+    set-and-setting.lib.mkConsumerFlake {
+      inherit self nixpkgs set-and-setting;
       fragments = [
         "base"
         "nix"
@@ -48,86 +44,12 @@
         "markdown"
         "yaml"
       ];
-    in
-    {
-      packages = forAllSystems (pkgs: {
+      src = ./.;
+      extraPackages = pkgs: {
         default = import ./model2vec.nix {
           inherit pkgs;
           src = model2vec-src;
         };
-        setting = (set-and-setting.lib.mkSetting { inherit pkgs; }).materialized;
-      });
-
-      devShells = forAllSystems (
-        pkgs:
-        let
-          mat = set-and-setting.lib.materializationFor { inherit pkgs fragments; };
-          sys = pkgs.stdenv.hostPlatform.system;
-        in
-        set-and-setting.lib.mkDevShells {
-          inherit pkgs;
-          basePackages = mat.packages;
-          settingHook = ''
-            ${self.packages.${sys}.setting}/bin/sync-setting .
-            _assemble_out="$(mktemp -d)"
-            FRAGMENTS="${builtins.concatStringsSep " " fragments}" \
-              out="$_assemble_out" \
-              FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook" \
-              bash "${set-and-setting}/setting/lib/assemble-lefthook.sh"
-            cp -f "$_assemble_out/lefthook.yml" lefthook.yml
-            rm -rf "$_assemble_out"
-          '';
-        }
-      );
-
-      checks = forAllSystems (
-        pkgs:
-        (set-and-setting.lib.checksFor {
-          inherit pkgs fragments;
-          src = ./.;
-        })
-        // {
-          dep-graph = set-and-setting.lib.mkDepGraphCheck {
-            inherit pkgs;
-            projectRoot = ./.;
-          };
-          default = pkgs.runCommand "checks" { } "touch $out";
-        }
-      );
-
-      apps = forAllSystems (
-        pkgs:
-        let
-          mat = set-and-setting.lib.materializationFor { inherit pkgs fragments; };
-        in
-        {
-          confirm = {
-            type = "app";
-            program = "${
-              pkgs.writeShellApplication {
-                name = "confirm";
-                runtimeInputs = [
-                  pkgs.coreutils
-                  pkgs.diffutils
-                  pkgs.findutils
-                  pkgs.gawk
-                  pkgs.git
-                  pkgs.gnugrep
-                ]
-                ++ mat.packages;
-                text = ''
-                  export FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook"
-                  export ASSEMBLE_SCRIPT="${set-and-setting}/setting/lib/assemble-lefthook.sh"
-                  export DETECT_SCRIPT="${set-and-setting}/setting/lib/detect-fragments.sh"
-                  export SETTING_SRC="${self.packages.${pkgs.stdenv.hostPlatform.system}.setting}"
-                  export CONFIRM_SCRIPT="${set-and-setting}/lib/confirm.sh"
-                  export CONFIRM_REV="${set-and-setting.rev or "unknown"}"
-                  bash "$CONFIRM_SCRIPT"
-                '';
-              }
-            }/bin/confirm";
-          };
-        }
-      );
+      };
     };
 }
