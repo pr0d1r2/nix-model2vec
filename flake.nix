@@ -62,12 +62,15 @@
       ];
       forAllSystems =
         f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
-      tddOrder = forAllSystems (pkgs: pkgs.writeShellApplication {
-        name = "lefthook-tdd-order-bats";
-        text = ''
-          exit 0
-        '';
-      });
+      tddOrder = forAllSystems (
+        pkgs:
+        pkgs.writeShellApplication {
+          name = "lefthook-tdd-order-bats";
+          text = ''
+            exit 0
+          '';
+        }
+      );
     in
     base
     // {
