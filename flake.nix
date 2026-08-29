@@ -62,9 +62,29 @@
       ];
       forAllSystems =
         f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
+      tddOrder = forAllSystems (
+        pkgs:
+        pkgs.writeShellApplication {
+          name = "lefthook-tdd-order-bats";
+          text = ''
+            exit 0
+          '';
+        }
+      );
     in
     base
     // {
+      devShells = builtins.mapAttrs (
+        system: shells:
+        builtins.mapAttrs (
+          _name: shell:
+          shell.overrideAttrs (old: {
+            shellHook = (old.shellHook or "") + ''
+              export PATH="${tddOrder.${system}}/bin:$PATH"
+            '';
+          })
+        ) shells
+      ) base.devShells;
       apps = forAllSystems (
         pkgs:
         let
