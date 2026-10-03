@@ -32,9 +32,10 @@
       nixpkgs,
       set-and-setting,
       model2vec-src,
+      nix-lefthook,
       ...
     }:
-    let
+    with rec {
       fragments = [
         "base"
         "nix"
@@ -62,16 +63,7 @@
       ];
       forAllSystems =
         f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
-      tddOrder = forAllSystems (
-        pkgs:
-        pkgs.writeShellApplication {
-          name = "lefthook-tdd-order-bats";
-          text = ''
-            exit 0
-          '';
-        }
-      );
-    in
+    };
     base
     // {
       devShells = builtins.mapAttrs (
@@ -80,19 +72,19 @@
           _name: shell:
           shell.overrideAttrs (old: {
             shellHook = (old.shellHook or "") + ''
-              export PATH="${tddOrder.${system}}/bin:$PATH"
+              export PATH="${nix-lefthook.packages.${system}.lefthook-tdd-order-bats}/bin:$PATH"
             '';
           })
         ) shells
       ) base.devShells;
       apps = forAllSystems (
         pkgs:
-        let
+        with {
           inherit (pkgs.stdenv.hostPlatform) system;
           materialization = set-and-setting.lib.materializationFor {
             inherit pkgs fragments;
           };
-        in
+        };
         base.apps.${system}
         // {
           confirm = {
