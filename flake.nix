@@ -34,7 +34,7 @@
       model2vec-src,
       ...
     }:
-    let
+    with rec {
       fragments = [
         "base"
         "nix"
@@ -71,7 +71,7 @@
           '';
         }
       );
-    in
+    };
     base
     // {
       devShells = builtins.mapAttrs (
@@ -87,12 +87,12 @@
       ) base.devShells;
       apps = forAllSystems (
         pkgs:
-        let
+        with {
           inherit (pkgs.stdenv.hostPlatform) system;
           materialization = set-and-setting.lib.materializationFor {
             inherit pkgs fragments;
           };
-        in
+        };
         base.apps.${system}
         // {
           confirm = {
