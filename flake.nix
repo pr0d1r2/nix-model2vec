@@ -32,6 +32,7 @@
       nixpkgs,
       set-and-setting,
       model2vec-src,
+      nix-lefthook,
       ...
     }:
     with rec {
@@ -62,15 +63,6 @@
       ];
       forAllSystems =
         f: nixpkgs.lib.genAttrs supportedSystems (system: f nixpkgs.legacyPackages.${system});
-      tddOrder = forAllSystems (
-        pkgs:
-        pkgs.writeShellApplication {
-          name = "lefthook-tdd-order-bats";
-          text = ''
-            exit 0
-          '';
-        }
-      );
     };
     base
     // {
@@ -80,7 +72,7 @@
           _name: shell:
           shell.overrideAttrs (old: {
             shellHook = (old.shellHook or "") + ''
-              export PATH="${tddOrder.${system}}/bin:$PATH"
+              export PATH="${nix-lefthook.packages.${system}.lefthook-tdd-order-bats}/bin:$PATH"
             '';
           })
         ) shells
