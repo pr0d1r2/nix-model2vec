@@ -24,7 +24,7 @@ Standalone Nix package for [model2vec](https://github.com/MinishLab/model2vec) �
 
 ## §V VERSIONING
 
-- model2vec version: pinned in model2vec.nix (currently 0.8.1)
+- model2vec version: pinned in model2vec.nix (currently 0.10.0)
 - Bump: update `model2vec-src` input URL tag + version in model2vec.nix
 
 ## §T TESTING

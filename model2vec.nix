@@ -1,12 +1,12 @@
 { pkgs, src }:
 pkgs.python313Packages.buildPythonPackage {
   pname = "model2vec";
-  version = "0.8.1";
+  version = "0.10.0";
   pyproject = true;
 
   inherit src;
 
-  env.SETUPTOOLS_SCM_PRETEND_VERSION = "0.8.1";
+  env.SETUPTOOLS_SCM_PRETEND_VERSION = "0.10.0";
 
   build-system = with pkgs.python313Packages; [
     setuptools
@@ -14,10 +14,10 @@ pkgs.python313Packages.buildPythonPackage {
   ];
 
   dependencies = with pkgs.python313Packages; [
+    huggingface-hub
     jinja2
     joblib
     numpy
-    rich
     safetensors
     tokenizers
     tqdm
