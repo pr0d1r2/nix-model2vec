@@ -14,7 +14,6 @@
       url = "github:pr0d1r2/set-and-setting/fa85f87a1be50f44cd75ce6357520f725cf94b4c";
       inputs = {
         nixpkgs-lock.follows = "nixpkgs-lock";
-        nix-lefthook.follows = "nix-lefthook";
         nixpkgs.follows = "nixpkgs";
       };
     };
@@ -44,11 +43,13 @@
     with rec {
       fragments = [
         "base"
+        "actions"
         "nix"
         "shell"
         "ascii"
         "markdown"
         "yaml"
+        "toml"
       ];
       base = set-and-setting.lib.mkConsumerFlake {
         inherit self nixpkgs set-and-setting;
