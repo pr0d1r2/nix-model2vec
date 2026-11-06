@@ -12,9 +12,11 @@
 
     set-and-setting = {
       url = "github:pr0d1r2/set-and-setting/d0196d19a0611cc959d967da4ec9f2bd72f14927";
-      inputs.nixpkgs-lock.follows = "nixpkgs-lock";
-      inputs.nix-lefthook.follows = "nix-lefthook";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs-lock.follows = "nixpkgs-lock";
+        nix-lefthook.follows = "nix-lefthook";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
 
     model2vec-src = {
@@ -23,8 +25,10 @@
     };
     nix-lefthook = {
       url = "github:pr0d1r2/nix-lefthook/694b2e9f2ef2b25d7a46a7ec5686ab18097cbf29";
-      inputs.nixpkgs-lock.follows = "nixpkgs-lock";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs-lock.follows = "nixpkgs-lock";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
   };
 
