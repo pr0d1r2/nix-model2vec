@@ -6,11 +6,11 @@ Standalone Nix package for [model2vec](https://github.com/MinishLab/model2vec) �
 
 ## §C CONSTRAINTS
 
-- C1: Nix flake, pinned `nixos-25.11`
+- C1: Nix flake, nixpkgs follows `github:pr0d1r2/nixpkgs-lock` (fleet pin, currently `nixos-26.05`). Minimum nixpkgs: `nixos-26.05`. model2vec 0.10.0 needs `huggingface-hub>=1.0.0`, and `nixos-25.11` ships 0.35.3
 - C2: 4 systems: aarch64-darwin, x86_64-darwin, x86_64-linux, aarch64-linux
 - C3: Source pinned as `flake = false` input
 - C4: Python build via `buildPythonPackage` — setuptools backend
-- C5: Core deps: jinja2, joblib, numpy, safetensors, tokenizers, tqdm
+- C5: Core deps: huggingface-hub, jinja2, joblib, numpy, safetensors, tokenizers, tqdm
 - C6: cachix binary cache in `nixConfig`
 - C7: Tests disabled — require HuggingFace model downloads (⊥ nix sandbox)
 - C8: 6 nix-lefthook inputs w/ follows deduplication
@@ -20,7 +20,7 @@ Standalone Nix package for [model2vec](https://github.com/MinishLab/model2vec) �
 
 - I.pkg: `packages.<system>.default` — model2vec Python package
 - I.dev: `devShells.<system>.default` — dev environment w/ model2vec + linters + lefthook
-- I.flake-input: `inputs.nix-model2vec.url = "github:pr0d1r2/nix-model2vec"` w/ `nixpkgs.follows`
+- I.flake-input: `inputs.nix-model2vec.url = "github:pr0d1r2/nix-model2vec"` w/ `nixpkgs.follows`; the followed nixpkgs must be `nixos-26.05` or newer (C1). Consumers on `nixos-25.11` stay on model2vec 0.8.1 or move to nixpkgs-lock
 
 ## §V VERSIONING
 
