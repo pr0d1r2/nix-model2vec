@@ -11,7 +11,7 @@
     nixpkgs.follows = "nixpkgs-lock/nixpkgs";
 
     set-and-setting = {
-      url = "github:pr0d1r2/set-and-setting/d0196d19a0611cc959d967da4ec9f2bd72f14927";
+      url = "github:pr0d1r2/set-and-setting/fa85f87a1be50f44cd75ce6357520f725cf94b4c";
       inputs = {
         nixpkgs-lock.follows = "nixpkgs-lock";
         nix-lefthook.follows = "nix-lefthook";
