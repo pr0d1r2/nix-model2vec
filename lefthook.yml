@@ -13,9 +13,6 @@ pre-commit:
     yamllint:
       glob: "*.{yml,yaml}"
       run: timeout ${LEFTHOOK_YAMLLINT_TIMEOUT:-30} lefthook-yamllint {staged_files}
-    nix-flake-check:
-      glob: "*.nix"
-      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-600} nix flake check --option accept-flake-config false
 
 pre-push:
   commands:
@@ -30,7 +27,3 @@ pre-push:
     yamllint:
       glob: "*.{yml,yaml}"
       run: timeout ${LEFTHOOK_YAMLLINT_TIMEOUT:-30} lefthook-yamllint {push_files}
-    nix-flake-check:
-      # No glob: the guardrails (statix, nixfmt, typos, ...) live only in
-      # flake checks, and CI runs them on every push regardless of file type.
-      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-600} nix flake check --option accept-flake-config false
